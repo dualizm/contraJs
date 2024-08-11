@@ -1,3 +1,3 @@
 export default {
-  gravityForce: 0.1,
+  gravityForce: 0.2,
 };

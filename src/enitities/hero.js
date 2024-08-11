@@ -4,6 +4,7 @@ import config from "../config";
 const States = {
   stay: "stay",
   jump: "jump",
+  flyDown: "flyDown",
 };
 
 export default class Hero extends Container {
@@ -11,8 +12,8 @@ export default class Hero extends Container {
     x: 0,
     y: 0,
   };
-  #jumpForce = 2.5;
-  #speed = 2;
+  #jumpForce = 10;
+  #speed = 3;
   #movement = {
     x: 0,
     y: 0,
@@ -23,11 +24,18 @@ export default class Hero extends Container {
     right: 0,
   };
 
+  #rect = {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+  };
+
   #state = States.stay;
 
   constructor() {
     super();
-    const view = new Graphics().rect(0, 0, 20, 60).stroke(0xff0000);
+    const view = new Graphics().rect(0, 0, 20, 90).stroke(0xffff00);
 
     this.addChild(view);
   }
@@ -36,13 +44,19 @@ export default class Hero extends Container {
     this.#velocity.x = this.#movement.x * this.#speed;
     this.x += this.#velocity.x;
 
+    if (this.#velocity.y > 0 && this.isJump()) {
+      this.#state = States.flyDown;
+    }
+
     this.#velocity.y += config.gravityForce;
     this.y += this.#velocity.y;
   }
 
-  stay() {
+  stay(platformY) {
     this.#state = States.stay;
     this.#velocity.y = 0;
+
+    this.y = platformY - this.height;
   }
 
   jump() {
@@ -51,6 +65,10 @@ export default class Hero extends Container {
     }
 
     this.#state = States.jump;
+  }
+
+  isJump() {
+    return this.#state === States.jump;
   }
 
   startLeftMove() {
@@ -83,5 +101,18 @@ export default class Hero extends Container {
   stopRightMove() {
     this.#directionContext.right = 0;
     this.#movement.x = this.#directionContext.left;
+  }
+
+  getRect() {
+    this.#rect.x = this.x;
+    this.#rect.y = this.y;
+    this.#rect.width = this.width;
+    this.#rect.height = this.height;
+
+    return this.#rect;
+  }
+
+  throwDown() {
+    this.#state = States.jump;
   }
 }
